@@ -2,6 +2,10 @@
 rssinfo.logining = 0;
 rssinfo.site = [];
 rssinfo.cache = [];
+rssinfo.counter = {
+	'items':0,
+	'bytes':0
+}
 /***********
 	rssinfo.site[0] = {
 		'name':'QQ250',
@@ -56,11 +60,15 @@ function item_class(_link,_date,_title,_desc,_status,site_id){
 				console.log(text.substr(0,5)+"Wa.",new Date(),'\n',r);
 				if (r.error == "40025:Error: repeated weibo text!")//error_code
 					this_item.status = 1;
+				response_error_message('Send_Error',r.error_code,r.error,debug.get_str_length(text));	
 			}else{
-				console.log(text.substr(0,5)+"Accepd.",new Date());
+				//console.log(text.substr(0,5)+"Accepd.",new Date());
 				//if (rssinfo.site[site_id].send_time <new Date(date).getTime())
 				//	rssinfo.site[site_id].send_time = new Date(date).getTime()
 				this_item.status = 1;
+				rssinfo.counter.items++;
+				rssinfo.counter.bytes+=debug.get_str_length(text);
+				//response_error_message('Send_Success',0,0,debug.get_str_length(text));	
 			}
 			//add to cache list;
 			if (this_item.status == 1)
@@ -113,6 +121,7 @@ function site_class(site_id){
 			if(rssinfo.logining == 0 && confirm("是否登录以继续同步？点取消不再提示。")){
 				//rssinfo.logining = 1;
 				oauth.authorize(function(){
+					updateBadgeText('');
 					rssinfo.logining = 0;
 					len = this_site.data.item_list.length;
 					console.log("同步"+len+"条数据");
@@ -223,7 +232,9 @@ function site_class(site_id){
 		//download feed file from web 
 		if (this.status == 3){
 			//timeout warning
-			console.log(name + "already downloading."+new Date());
+			if (localStorage["debug"] == "true")
+				console.log(this.name + " already downloading."+new Date());
+			response_error_message('Download_Time_Out',0,0,0);
 			return;
 		}
 		
@@ -231,12 +242,14 @@ function site_class(site_id){
 		xhr.onreadystatechange = function() {
 			//console.log(this_site.feedurl,xhr.readyState);
 			if (xhr.readyState == 4) {
-				console.log("Begin..."+name+new Date());
+				if (localStorage["debug"] == "true")
+					console.log("Begin..."+this_site.name+new Date());
 				//from Subscribe in Feed Reader
 				var doc = xhr.responseXML;
 				if (!doc) {
 					this_site.status = 2;
-					console.log(name + "Not a valid feed.");
+					console.log(this_site.name + " Not a valid feed.");
+					response_error_message('Feed_Format_Error',0,0,0);
 					return;
 				} 
 				this_site.status = 5;
@@ -317,7 +330,8 @@ function site_class(site_id){
 				if (this_time != -1)
 					this_site.refresh_time = this_time;
 				delete xhr;
-				console.log("End.")
+				if (localStorage["debug"] == "true")
+					console.log("End..."+this_site.name+new Date())
 				generator_message();
 				
 			}//End if
@@ -328,9 +342,6 @@ function site_class(site_id){
 		
 	}
 	//var this_site = this;
-	this.debug_get_length = function(str){
-		return Math.ceil((str.length - (str.match(/[^\x00-\x80]/g)).length)/2)+(str.match(/[^\x00-\x80]/g)).length;
-	}
 	this.debug_makemessage = function(){
 		generator_message();
 	}
@@ -477,3 +488,24 @@ debug.send = function(site_id){
 	rssinfo.site[site_id].generator_message();
 	rssinfo.site[site_id].send();
 }
+debug.get_str_length = function(str){
+	if (typeof str != "string")
+		return 0;
+	//urls length always 12 bytes;
+	//from sina.com.cn
+	var regexp = new RegExp("(http://)+(([-A-Za-z0-9]+(.[-A-Za-z0-9]+)*(.[-A-Za-z]{2,5}))|([0-9]{1,3}(.[0-9]{1,3}){3}))(:[0-9]*)?(/[-A-Za-z0-9_$.+!*(),;:@&=?/~#%]*)*", "gi");  
+	var s1 = str.match(/[^\x00-\x80]/g);
+	var len;
+	if (s1 != null)
+		len = s1.length;
+	else
+		len = 0;
+	return Math.ceil((str.length - len)/2) + len;
+}
+
+//error analytics ,error_code only
+function response_error_message(msg_status,error_code,error,str_len) {
+    _gaq.push(['_trackEvent',msg_status,error_code, error, str_len]);
+	if (localStorage["debug"] == "true")
+		console.log(msg_status,error_code, error, str_len);
+};

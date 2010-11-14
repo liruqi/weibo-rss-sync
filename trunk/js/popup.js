@@ -22,6 +22,7 @@ function get_user_id(){
 	}, request);
 }
 function login(){
+	trackButton("Login");
 	oauth.authorize(function(){
 		get_user_id();
 	});
@@ -39,6 +40,7 @@ function login(){
 	*/
 }
 function logout(){
+	trackButton("Logout");
 	document.getElementById("log_info").innerHTML = '<a href="javascript:void(0);" onclick="login();">点击登录</a>';
 	oauth.clearTokens();
 }
@@ -57,3 +59,6 @@ function popup_onload(){
 	});
 }
 
+function trackButton(button_id) {
+    _gaq.push(['_trackEvent', 'Popup_' + button_id, 'clicked']);
+  };

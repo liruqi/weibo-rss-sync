@@ -3,9 +3,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>RSS高级同步</title>
-<script type="text/javascript" src="./js/chrome_ex_oauthsimple.js"></script>
-<script type="text/javascript" src="./js/chrome_ex_oauth.js"></script>
 <script type="text/javascript" src="./js/userdata.js"></script>
+
 <script type="text/javascript">
 function output_rss_list(){
 	var i,len;
@@ -32,7 +31,9 @@ function del_site(id){
 	}
 	chrome.extension.sendRequest(request,function(response){
 		options_onload();
+		trackButton('Delete','Accept');
 	});	
+	trackButton('Delete','Click');
 }
 function format_check(str){
 	if (typeof str != "string")
@@ -100,11 +101,42 @@ function add_new_feed(){
 		}
 	};
 	chrome.extension.sendRequest(request,function(response){
+		trackButton('Add','Accept');
 		options_onload();
 	});
+	trackButton('Add','Click');
 
 }
+function set_login_time_out(s){
+	if(s == '+')
+	{
+		if (parseInt(localStorage["login_time_out"])>8000)
+			localStorage["login_time_out"] = parseInt(localStorage["login_time_out"])+5000;
+		else
+			localStorage["login_time_out"] = 13000;	
+		var msg = "已设置延时"+localStorage["login_time_out"]+"毫秒。";
+		/***
+		bug~
+		if(!oauth.hasToken()){
+			msg += "是否立即登录？";
+			if(confirm(msg)){
+			//rssinfo.logining = 1;
+			oauth.authorize(function(){
+				//alert("Accepd");
+			});	
+			}
+		}else
+			;
+		***/	
+		document.getElementById("time_out").innerHTML = msg;
+	}else{
+		localStorage.removeItem("login_time_out");
+		document.getElementById("time_out").innerHTML = "已恢复延时8秒";
+	}
+}
 </script>
+<script type="text/javascript" src="./js/analytics.js"></script>
+
 <style>
 .btn_delete{
 	padding-left:5px;
@@ -125,7 +157,7 @@ function add_new_feed(){
 <div class="notice" >
 新添加后的feed会被同步。
 所有feed每2分钟下载一次。所有feed的数据每3分半同步一次。
-为了防止频繁同步被新浪限制，每次每个feed只同步5条数据。其余数据会在下次同步。（新浪限制每小时最多发布30条数据）<br />
+为了防止频繁同步被新浪限制，每次每个feed只同步3条数据。其余数据会在下次同步。（新浪限制每小时最多发布30条数据）<br />
 注意：这是一个本地化脚本，如果Chrome被关闭，则同步终止。下次Chrome启动时会继续同步。
 Chrome关闭期间的数据如果更新太多则可能会有遗漏（多余15条或更新数小于feed输出条数）。<br />
 </div>
@@ -146,9 +178,17 @@ Chrome关闭期间的数据如果更新太多则可能会有遗漏（多余15条
 [msg:快讯]+[title]+[desc]+[link]<br />
 </label><br/>
 <span name="new_feed_style_preview"></span><br />
-<button value="submit" onclick="add_new_feed()">增加</button>
+<button value="submit" onclick="add_new_feed()">增加</button><br />
+<button onclick='set_login_time_out("+")'>如果无法登陆（网络太慢）请点此增加延时。</button><br />
+<button onclick='set_login_time_out("-")'>恢复默认延时设置（8秒）</button><span id="time_out"></span><br />
 <a href="./submit.html">提交反馈</a><span>   im007boy@gmail.com</span>
 </div>
+<script type="text/javascript">
+function trackButton(button_id,status) {
+    _gaq.push(['_trackEvent','Rss_Set', button_id, status]);
+  };
+</script>
+
 </body>
 </html>
 
