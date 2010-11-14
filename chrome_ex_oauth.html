@@ -24,7 +24,7 @@ function onLoad() {
 function fun(){
 	document.body.innerHTML += hi[parseInt(Math.random()*(hi.length-1))];
 }
-setTimeout(close,8000);
+setTimeout(close,parseInt(localStorage["login_time_out"]) >8000?parseInt(localStorage["login_time_out"]):8000);
 setInterval(fun,300);
 </script>
 </head>

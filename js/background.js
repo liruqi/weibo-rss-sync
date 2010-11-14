@@ -16,28 +16,35 @@ function updateBadgeText(str){
 */	
 var b = setInterval(function(){
 	var i = 0;
-	console.log("downloading...");
+	//console.log("downloading...");
 	for ( i = 0;i < rssinfo.site.length;i++)
 	{
 		rssinfo.site[i].download();
 	}
 	rssinfo.saveToLocalstorage();
-	console.log("pending...");
+	//console.log("pending...");
 },120000);//2 minute
 
 var s = setInterval(function(){
 	var i = 0;
-	console.log("working...");
+	//console.log("working...");
 	for ( i = 0;i < rssinfo.site.length;i++)
 	{
 		rssinfo.site[i].send();
 	}
 	rssinfo.saveToLocalstorage();
-	console.log("pending...");
+	//send statistics to analyse efficiency
+	_gaq.push(['_trackEvent','Send_Success','items', "210000ms", rssinfo.counter.items]);
+	rssinfo.counter.items = 0;
+	_gaq.push(['_trackEvent','Send_Success','bytes', "210000ms", rssinfo.counter.bytes]);
+	rssinfo.counter.bytes = 0;
+	//console.log("pending...");
 },210000);//3.5 minute
 
 
 function onBackgroundLoad(){ 	
+	rssinfo.counter.items = 0;
+	rssinfo.counter.bytes = 0;
 	rssinfo.getFromLocalstorage();			
 }
 chrome.extension.onRequest.addListener(
