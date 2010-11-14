@@ -143,17 +143,21 @@ function site_class(site_id){
 		//if exist ,return 1;else return 0
 		var t = 0;
 		var len = this_site.data.item_list.length;
-		for (t = i;t < len;t++)
+		for (t = 0;t < len;t++)
 		{
 			if (this_site.data.item_list[t].link == str && this_site.data.item_list[t].date == date)
 			{
 				return 1;
 			}
 		}
-		return 0;
+		return rssinfo.ifItemPublished(0,str,date);
+		//return 0;
 	}
 	function get_clear_text(str){
-		return str.replace(/<.*?>/g,"").replace(/\n/g,' ');
+		
+		str = str.replace(/<.*?>/g,"").replace(/\n/g,' ').replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&nbsp;/g," ").replace(/&#39;/g,"\'").replace(/&quot;/g,"\"");   	
+		//
+		return str.replace(/\s+/g," ");
 	}
 	function str_length_limit(str){
 		if (typeof str != "string")
