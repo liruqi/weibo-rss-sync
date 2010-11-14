@@ -1,0 +1,21 @@
+{
+  "name": "微博RSS高级同步",
+  "description": "设置你的RSS源并同步到新浪微博。由于这是一个本地扩展，所以比其他同步服务更及时。同时提供更多设置。",
+  "icons": {
+    "16": "./img/icon16.png",
+    "48": "./img/icon48.png",
+    "128": "./img/icon128.png"
+  },
+  "browser_action": {
+    "default_icon": "./img/icon48.png",
+    "popup": "popup.html"
+  },
+  "options_page": "options.html",
+  "background_page": "background.html",
+  "permissions": [
+  	"tabs",
+	"http://*/*",
+	"https://*/*"
+  ],
+  "version": "1.1.9"
+}

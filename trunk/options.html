@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>RSS高级同步</title>
+<script type="text/javascript" src="./js/chrome_ex_oauthsimple.js"></script>
+<script type="text/javascript" src="./js/chrome_ex_oauth.js"></script>
+<script type="text/javascript" src="./js/userdata.js"></script>
+<script type="text/javascript">
+function output_rss_list(){
+	var i,len;
+	len = rssinfo.site.length;
+	document.getElementById("rss_list").innerHTML = "";
+	for (i = 0;i < len;i++)
+	{
+		document.getElementById("rss_list").innerHTML += '<li><span class="rss_name" title="'+ rssinfo.site[i].feedurl +'">'+rssinfo.site[i].name+'</span><span class="btn_delete" title="删除" onclick="del_site('+i+')">X</span></li>'
+	}
+}
+function options_onload(){
+	var i = 0;
+	rssinfo.site = [];
+	rssinfo.cache = [];
+	rssinfo.getFromLocalstorage();
+	output_rss_list();
+}
+function del_site(id){
+	var request = {
+		'hope':'delete',
+		'site':{
+			'id':id
+		}
+	}
+	chrome.extension.sendRequest(request,function(response){
+		options_onload();
+	});	
+}
+function format_check(str){
+	if (typeof str != "string")
+		str = ""
+	var format = str.split('+');
+	var pre = {
+		'setting':[],
+		'str':''
+	}
+	pre.setting = [];
+	for (var i = 0;i < format.length;i++)
+	{
+		if (format[i].slice(-1) != ']')
+			continue;
+		switch(format[i])
+		{
+		case "[title]"://title
+			pre.setting.push("title");
+			pre.str += "标题"
+			break;
+		case "[link]"://link
+			pre.setting.push("link");
+			pre.str += "http://www.neverbest.com"
+			break;
+		case "[desc]":
+			pre.setting.push("desc");
+			pre.str += "这是简介。此扩展由im007boy@gmail.com制作，欢迎提出建议。";
+			break;
+		default:
+			if(format[i].slice(0,5) == '[msg:' && format[i].length >6)
+			{
+				pre.setting.push("msg:"+format[i].slice(5,-1));
+				pre.str += format[i].slice(5,-1);
+			}
+			break;
+		}
+	}
+	//console.log(setting);
+	return pre;
+}
+function format_preview(){
+	document.getElementsByName("new_feed_style_preview")[0].innerHTML = "";
+	var pre = format_check(document.getElementsByName("new_feed_style")[0].value);
+	for (var i= 0;i < pre.setting.length;i++)
+		document.getElementsByName("new_feed_style_preview")[0].innerHTML += '<small style="color:gray">[</small>'+pre.setting[i]+'<small style="color:gray">]</small>';
+	document.getElementsByName("new_feed_style_preview")[0].innerHTML += '<div style="border: 1px solid #CCC;">'+pre.str + '</div>';
+}
+function add_new_feed(){
+	var name = document.getElementsByName("new_feed_name")[0].value;
+	var url = document.getElementsByName("new_feed_url")[0].value;
+	if (name == '' || url == '')
+		return ;
+	//format check
+	var format = document.getElementsByName("new_feed_style")[0].value;
+	var pre = {};
+	pre = format_check(format);
+	
+	var request = {
+		'hope':'add_new_feed',
+		'site':{
+			'name':name,
+			'url':url,
+			'feedurl':url,
+			'setting':pre.setting
+		}
+	};
+	chrome.extension.sendRequest(request,function(response){
+		options_onload();
+	});
+
+}
+</script>
+<style>
+.btn_delete{
+	padding-left:5px;
+	color:red;
+	cursor:pointer;
+}
+.notice{
+	border: 1px solid #CCC;
+	border-bottom-left-radius: 3px 3px;
+	border-bottom-right-radius: 3px 3px;
+	border-top-left-radius: 3px 3px;
+	border-top-right-radius: 3px 3px;
+
+}
+</style>
+</head>
+<body onload="options_onload()">
+<div class="notice" >
+新添加后的feed会被同步。
+所有feed每2分钟下载一次。所有feed的数据每3分半同步一次。
+为了防止频繁同步被新浪限制，每次每个feed只同步5条数据。其余数据会在下次同步。（新浪限制每小时最多发布30条数据）<br />
+注意：这是一个本地化脚本，如果Chrome被关闭，则同步终止。下次Chrome启动时会继续同步。
+Chrome关闭期间的数据如果更新太多则可能会有遗漏（多余15条或更新数小于feed输出条数）。<br />
+</div>
+<ul id="rss_list">
+
+</ul>
+<div>
+<label>标题：<input name="new_feed_name" type="text" size="35"> </label><br/>
+<label>feed地址,http://或https://开头：<input name="new_feed_url" type="text" size="35"> </label><br />
+<label>格式：<input name="new_feed_style" type="text" size="35" onKeyUp="format_preview()" onchange="format_preview()"><br />指令包括<br />
+标题:[title] <br />
+链接:[link] <br />
+简介:[desc] <br />
+自定义字符串:[msg:字符串] <br />
+使用+号相连接。别用空格呀！只能用一次。样例：<br />
+[desc]<br />
+[title]+[link]<br />
+[msg:快讯]+[title]+[desc]+[link]<br />
+</label><br/>
+<span name="new_feed_style_preview"></span><br />
+<button value="submit" onclick="add_new_feed()">增加</button>
+<a href="./submit.html">提交反馈</a><span>   im007boy@gmail.com</span>
+</div>
+</body>
+</html>
+

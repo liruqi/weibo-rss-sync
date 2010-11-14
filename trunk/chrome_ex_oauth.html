@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!--
+ * Copyright (c) 2009 The Chromium Authors. All rights reserved.  Use of this
+ * source code is governed by a BSD-style license that can be found in the
+ * LICENSE file.
+-->
+<html>
+<head>
+<title>OAuth Redirect Page</title>
+<style type="text/css">
+body {
+	font: 16px Arial;
+	color: #333;
+}
+</style>
+<script type="text/javascript" src="./js/chrome_ex_oauthsimple.js"></script>
+<script type="text/javascript" src="./js/chrome_ex_oauth.js"></script>
+<script type="text/javascript">
+var hi = ['@',"#","%","$","*","^"];
+var ha = "一男养一猪，特烦它，就想把它给扔了，但是此猪认得回家的路，扔了好多次都没有成功。某日，此人驾车弃猪，当晚打电话给他的妻子问：“猪归否？”其妻曰：“归矣。”男非常气愤，大吼道：“快让它接电话，我迷路了。";
+function onLoad() {
+	ChromeExOAuth.initCallbackPage();
+};
+function fun(){
+	document.body.innerHTML += hi[parseInt(Math.random()*(hi.length-1))];
+}
+setTimeout(close,8000);
+setInterval(fun,300);
+</script>
+</head>
+<body onload="onLoad();">
+
+</body>
+</html>
