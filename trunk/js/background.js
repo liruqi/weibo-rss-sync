@@ -1,4 +1,11 @@
-﻿var oauth=ChromeExOAuth.initBackgroundPage({
+﻿/*************************************************************************
+* Copyright (c) 2010 im007boy@gmail.com. All rights reserved.            *
+* Use of this source code is governed by a BSD-style license that can be *
+* found in the LICENSE file.                                             *
+*************************************************************************/
+
+
+var oauth=ChromeExOAuth.initBackgroundPage({
 	'request_url': "http://api.t.sina.com.cn/oauth/request_token",
 	'authorize_url': "http://api.t.sina.com.cn/oauth/authorize",
 	'access_url': "http://api.t.sina.com.cn/oauth/access_token",
@@ -23,7 +30,7 @@ var b = setInterval(function(){
 	}
 	rssinfo.saveToLocalstorage();
 	//console.log("pending...");
-},120000);//2 minute
+},60000);//2 minute
 
 var s = setInterval(function(){
 	var i = 0;
@@ -39,7 +46,7 @@ var s = setInterval(function(){
 	_gaq.push(['_trackEvent','Send_Success','bytes', "210000ms", rssinfo.counter.bytes]);
 	rssinfo.counter.bytes = 0;
 	//console.log("pending...");
-},210000);//3.5 minute
+},70000);//3.5 minute
 
 
 function onBackgroundLoad(){ 	
