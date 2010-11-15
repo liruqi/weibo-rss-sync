@@ -1,3 +1,9 @@
+/*************************************************************************
+* Copyright (c) 2010 im007boy@gmail.com. All rights reserved.            *
+* Use of this source code is governed by a BSD-style license that can be *
+* found in the LICENSE file.                                             *
+*************************************************************************/
+
 var oauth=ChromeExOAuth.fromConfig({
 			'request_url': "http://api.t.sina.com.cn/oauth/request_token",
 			'authorize_url': "http://api.t.sina.com.cn/oauth/authorize",
@@ -44,6 +50,26 @@ function logout(){
 	document.getElementById("log_info").innerHTML = '<a href="javascript:void(0);" onclick="login();">点击登录</a>';
 	oauth.clearTokens();
 }
+function add_feed(title,href){
+	chrome.tabs.create({url:"./options.html?title="+title+"&href="+href});	
+}
+function find_feed(){
+	chrome.tabs.getSelected(null, function(tab) {
+	  chrome.tabs.sendRequest(tab.id, {greeting: "find_feed"}, function(response) {
+		var dom = document.getElementById("feed_find");
+		var feeds = response.feeds;
+		var feed_title;
+		var feed_href;
+		dom.innerHTML = "";
+		for(var i = 0;i < feeds.length;i++)
+		{
+			if (i != 0)
+				dom.innerHTML += '<br />'
+			dom.innerHTML +='<a href="javascript:void(0);" onclick=\'add_feed("'+ encodeURI(feeds[i].title)+'","'+encodeURI(feeds[i].href)+'")\'>同步 '+ feeds[i].title +'</a>'
+		}
+	  });
+	});	
+}
 function popup_onload(){
 	document.getElementById("log_info").innerHTML = '正在获取登录数据...';
 	setTimeout(function(){
@@ -57,6 +83,7 @@ function popup_onload(){
 		document.getElementById("user_setting").innerHTML = '已登记'+ response.site.length +'个站点.'
 		document.getElementById("user_setting").innerHTML += '<a href="./options.html" target="_blank">修改</a>';
 	});
+	find_feed();
 }
 
 function trackButton(button_id) {

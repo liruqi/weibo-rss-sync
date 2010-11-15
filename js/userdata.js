@@ -1,4 +1,10 @@
-﻿rssinfo = {};
+﻿/*************************************************************************
+* Copyright (c) 2010 im007boy@gmail.com. All rights reserved.            *
+* Use of this source code is governed by a BSD-style license that can be *
+* found in the LICENSE file.                                             *
+*************************************************************************/
+
+rssinfo = {};
 rssinfo.logining = 0;
 rssinfo.site = [];
 rssinfo.cache = [];
@@ -159,23 +165,6 @@ function site_class(site_id){
 		//
 		return str.replace(/\s+/g," ");
 	}
-	function str_length_limit(str){
-		if (typeof str != "string")
-			return 0;
-		//urls length always 12 bytes;
-		//from sina.com.cn
-		var regexp = new RegExp("(http://)+(([-A-Za-z0-9]+(.[-A-Za-z0-9]+)*(.[-A-Za-z]{2,5}))|([0-9]{1,3}(.[0-9]{1,3}){3}))(:[0-9]*)?(/[-A-Za-z0-9_$.+!*(),;:@&=?/~#%]*)*", "gi");  
-		var s1 = str.match(/[^\x00-\x80]/g);
-		var len;
-		if (s1 != null)
-			len = s1.length;
-		else
-			len = 0;
-		if( Math.ceil((str.length - len)/2) + len > 134) //149  will 40028:内容长度不正确 whth str ...in log file 023
-			return 1;
-		else
-			return 0;
-	}
 	function generator_message(){
 		//status string
 		var i = 0;
@@ -226,7 +215,11 @@ function site_class(site_id){
 					else if (link != "")
 						link = "";
 					else 
+					{
+						str = get_clear_text(this_site.data.item_list[i].title);
+						str = str.substr(0,130);
 						break;
+					}	
 				}
 			}while(str_length_limit(str));
 			this_site.data.item_list[i].message = str;
@@ -325,7 +318,7 @@ function site_class(site_id){
 					  else
 						itemLink = link[0].getAttribute('href');
 					}
-					if (!if_item_exist(itemLink,itemDate))//no repead message in the pending list
+					if (!if_item_exist(itemLink,itemDate))//no repead message in the pending list and cache
 						this_site.data.item_list.push(new item_class(itemLink,itemDate,itemTitle,itemDesc,0,this_site.id));
 				}
 				//
@@ -468,6 +461,24 @@ function updateBadgeText(str){
 	chrome.browserAction.setBadgeBackgroundColor({"color":[255,0,0,190]});
 	chrome.browserAction.setBadgeText({"text":str});
 } 
+function str_length_limit(str){
+	if (typeof str != "string")
+		return 0;
+	//urls length always 12 bytes;
+	//from sina.com.cn
+	var regexp = new RegExp("(http://)+(([-A-Za-z0-9]+(.[-A-Za-z0-9]+)*(.[-A-Za-z]{2,5}))|([0-9]{1,3}(.[0-9]{1,3}){3}))(:[0-9]*)?(/[-A-Za-z0-9_$.+!*(),;:@&=?/~#%]*)*", "gi");  
+	var s1 = str.match(/[^\x00-\x80]/g);
+	var len;
+	if (s1 != null)
+		len = s1.length;
+	else
+		len = 0;
+	if( Math.ceil((str.length - len)/2) + len > 134) //149  will 40028 ...in log file 023
+		return 1;
+	else
+		return 0;
+}
+
 /*****************************************************/
 var debug = {};
 debug.re = function(){
